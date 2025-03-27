@@ -1,0 +1,39 @@
+## TEMA 3 SCD - Florescu Cosmin Mihai - 341C3
+
+    Acesta tema implementeaza un sistem IoT pentru procesarea datelor
+folosind containere Docker. Se simuleaza și se analizează datele de la
+senzori cu ajutorul unor servicii Docker Compose, incluzand mesagerie MQTT,
+stocare de date, vizualizare și publicare de date simulate.
+    Timpul de implementare a fost de aproximativ 3-4 zile.
+
+### Functionalitati:
+- #### mqtt-broker:
+    - Gestioneaza comunicarea în timp real între publisheri și subscriberi.
+    Folosește Eclipse Mosquitto și expune porturile 1883 (MQTT)
+
+- #### influxdb:
+    - Stocheaza datele IoT colectate.
+    Foloseste InfluxDB 2.0 cu utilizatori, bucket-uri si organizatii preconfigurate.
+    - datele au fost salvate ca volume persistente in folder-ul influxdb
+
+- #### grafana
+    - Vizualizeaza datele din InfluxDB.
+    Foloseste dashboard-uri si surse de date preconfigurate.
+    - in folder-ul provisioning/ am salvat datele din dashboard-uri in format JSON
+
+- #### adaptor
+    - Proceseaza datele din brokerul MQTT si le trimite catre InfluxDB.
+
+- #### message_publisher
+    - Simuleaza dispozitive IoT care publica date random catre brokerul MQTT.
+
+### Rulare:
+    - ./run.sh din root-ul temei
+    - pentru a publica mesaje, python3 adaptor/adaptor.py pentru a pornit adaptorul
+    care primeste, parseaza si scrie in baza de date din influx
+    - pentru a publica mesaje sunt disponibile publish_message.py si
+    publish_messages1.py
+    - mentionez ca adaptorul si publisher-ul de mesaje functioneaza si pornesc in 
+    cadrul stack.yml, dar mesajele nu sunt publicate cu succes
+
+

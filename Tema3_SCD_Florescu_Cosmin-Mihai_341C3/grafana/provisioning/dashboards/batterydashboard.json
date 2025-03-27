@@ -1,0 +1,217 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 3,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fe9qeirgzcw00f"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 0,
+        "showHeader": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "query": "// Combine all topics that start with \"UPB/\"\r\nqCurrent = from(bucket: \"iot_data\")\r\n  |> range(start: -48h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"BAT\" and r[\"location\"] =~ /UPB/)\r\n  |> aggregateWindow(every: 1s, fn: mean, createEmpty: false)\r\n  |> last()\r\n  |> map(fn: (r) => ({ r with Metric: \"Current\" }))\r\n\r\nqMin = from(bucket: \"iot_data\")\r\n  |> range(start: -48h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"BAT\" and r[\"location\"] =~ /UPB/)\r\n  |> aggregateWindow(every: 1s, fn: mean, createEmpty: false)\r\n  |> min()\r\n  |> map(fn: (r) => ({ r with Metric: \"Minimum\" }))\r\n\r\nqMax = from(bucket: \"iot_data\")\r\n  |> range(start: -48h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"BAT\" and r[\"location\"] =~ /UPB/)\r\n  |> aggregateWindow(every: 1s, fn: mean, createEmpty: false)\r\n  |> max()\r\n  |> map(fn: (r) => ({ r with Metric: \"Maximum\" }))\r\n\r\nqAvg = from(bucket: \"iot_data\")\r\n  |> range(start: -48h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"BAT\" and r[\"location\"] =~ /UPB/)\r\n  |> aggregateWindow(every: 1s, fn: mean, createEmpty: false)\r\n  |> mean()\r\n  |> map(fn: (r) => ({ r with Metric: \"Average\" }))\r\n\r\n// Combine all metrics into a single dataset\r\nunion(tables: [qCurrent, qMin, qMax, qAvg])\r\n  |> group(columns: [\"location\"])\r\n  |> pivot(rowKey: [\"station\"], columnKey: [\"Metric\"], valueColumn: \"_value\")\r\n  |> yield(name: \"BatteryStats\")\r\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Battery Table",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {
+              "Average UPB": 2,
+              "Current UPB": 1,
+              "Maximum UPB": 3,
+              "Minimum UPB": 4,
+              "station UPB": 0
+            },
+            "renameByName": {
+              "Average UPB": "Avg",
+              "Current UPB": "Current",
+              "Maximum UPB": "Max",
+              "Minimum UPB": "Min",
+              "station UPB": "Station"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "uid": "influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -48h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"BAT\")\r\n  // Optional: if you want only devices that follow a naming pattern, e.g. r[\"_measurement\"] =~ ...\r\n  |> aggregateWindow(every: 1s, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Battery charging evolving",
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "refresh": "30s",
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Battery Dashboard Copy",
+  "uid": "dea0ie7jdw9a8c",
+  "version": 1,
+  "weekStart": ""
+}
